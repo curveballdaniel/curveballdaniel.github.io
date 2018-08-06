@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Daniel Peter's Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" async="" src="http://www.google-analytics.com/ga.js"></script>
+
+  <script language="javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2396995-2']);
+    _gaq.push(['_trackPageview']);
+  
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+<head>
+  <title>Langton's Ants in Javascript - Ross Scrivener</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <style>
+  
+  html, body { background: black; padding: 0; margin: 0; }
+  * {
+    -moz-user-select: none;
+      -webkit-user-select: none;
+      user-select: none;
+  }
+
+  /* Container needed to position the overlay. */
+  .avatarcontainer {
+    position: relative;
+    width: 75%;
+    max-width: 300px;
+  }
+
+  /* Make the image to responsive */
+  .image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10%;
+  }
+
+  /* first thing/nextthing/lastthing change color, position*/
+  .shape{
+    text-align:center;
+    font-size: 16px;
+    background-color:rgba(3,78,136,0.7);
+    width:300px;
+    height:60px;
+    line-height:60px;
+    color:white;
+    margin:20px auto;
+    position:relative;
+    border-radius: 0px 10px 10px 0px;
+  }
+  .shape:before{
+    content:"";
+    width:0px;
+    height:0px;
+    border-top:60px solid rgba(3,78,136,0.7);
+    border-left:60px solid transparent;
+    position:absolute;
+    right:100%;
+    top:0px;
+  }
+
+  /* format icon with text in button */
+  .material-icons {
+    position: relative;
+    /* Adjust these values accordingly */
+    top: 4px;
+    size: 50%;
+  }
+
+  /* button template */
+  .btn {
+    background: #3498db;
+    background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+    background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+    background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+    background-image: -o-linear-gradient(top, #3498db, #2980b9);
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    -webkit-border-radius: 60;
+    -moz-border-radius: 60;
+    border-radius: 60px;
+    -webkit-box-shadow: 1px 1px 3px #666666;
+    -moz-box-shadow: 1px 1px 3px #666666;
+    box-shadow: 1px 1px 3px #666666;
+    font-family: Georgia;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    background: #3cb0fd;
+    background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+    text-decoration: none;
+  }
+  
+  #controls {
+    font-family: Verdana;
+    font-size: 90%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    color: #fff;
+    display: block;
+    position: absolute;
+    top: 0%;
+    left: -400px;
+    background: rgba(80,80,80,.9);
+    padding: 20px 30px 20px 20px;
+    width: 430px;
+    
+    transition: left .5s;
+    -moz-transition: left .5s;
+    -webkit-transition: left .5s;
+    -o-transition: left .5s;
+  }
+  #controls:hover {
+    background: rgba(100,100,100,.9);
+  }
+  #controls.active {
+    left: 0px;
+  }
+  #controls p {
+    margin: 15px 0;
+  }
+  #controls label {
+    display: block;
+    padding: 0 0 5px 0;
+  }
+  #controls:after {
+    content: ">";
+    font-weight: bold;
+    position: absolute;
+    right: 10px;
+    top: 45%;
+  }
+  #controls.active:after {
+    content: "<";
+  }
+
+  /* opening left label */
+  .sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0; /* only diff here for right and left */
+    background-color: #ffffff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 40px;
+    padding-left: 30px;
+    opacity: 0.9;
+
+    border-radius: 10px 50px 10px 0px;
+  }
+
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 24px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+
+  @media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+  }
+
+    /* opening right label */
+  .rightsidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0; /* only diff here for right and left */
+    background-color: #ffffff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 40px;
+    opacity: 0.9;
+    border-radius: 50px 10px 0px 10px;
+  }
+
+  .rightsidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+
+  .rightsidenav a:hover {
+    color: #f1f1f1;
+  }
+
+  .rightsidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+
+  @media screen and (max-height: 450px) {
+  .rightsidenav {padding-top: 15px;}
+  .rightsidenav a {font-size: 18px;}
+  }
+
+  .rightnavopen {  
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
+  }
+
+  .topheader {
+    margin: auto;
+    width: 50%;
+    border: 3px solid green; /* please remove this */
+    padding: 10px;
+    text-align: center;
+  }
+
+  /* background image */
+  body, html {
+    height: 100%;
+  } 
+
+  * {box-sizing: border-box}
+
+  .btn2 {
+    background-color: DodgerBlue; /* Blue background */
+    border: none; /* Remove borders */
+    color: white; /* White text */
+    font-size: 16px; /* Set a font size */
+    cursor: pointer; /* Mouse pointer on hover */
+    
+  }
+
+  /* Darker background on mouse-over */
+  .btn2:hover {
+      background-color: RoyalBlue;
+  }
+
+  </style>
+</head>
+<body>
+
+<!-- background picture (tiled x and y in css) -->
+
+<script type="text/javascript">
+// credit to http://rossscrivener.co.uk/projects/langtons-ants/ for idea
+
+var util = util || {}
+
+util.fps = {
+  frametimes: [],
+  add: function(){
+    if (this.frametimes.length > 30) 
+      this.frametimes.splice(0, 1);
+    var currTime = new Date().getTime();
+    this.frametimes.push(currTime);
+    return Math.round(1000 / ((currTime - this.frametimes[0]) / (this.frametimes.length - 1)));
+  }
+}
+
+// return a random number in range
+util.random = function(minVal, maxVal, floatVal){
+  var randVal = minVal + (Math.random() * (maxVal-minVal));
+  return typeof floatVal == 'undefined' ? Math.round(randVal):randVal.toFixed(floatVal);
+}
+
+var ant = function(x, y, r, t){
+  nextcol = util.random(0,3);
+  if (nextcol == 0)
+    colour = "green";
+  else if (nextcol == 1)
+    colour = "blue";
+  else if (nextcol == 2)
+    colour = "yellow";
+  else 
+    colour = "gray";
+  return { currX: x, currY: y, currR: r, type: t, colour: colour }
+}
+
+var anim = {
+  
+  interval: false,
+  
+  tick: function(){
+
+    // detect any clicks to add new ants
+    if (this.clicks.length > 0){
+      for(var i in this.clicks){
+        
+        var x = Math.floor(this.clicks[i][0] / this.cellsize);
+          var y = Math.floor(this.clicks[i][1] / this.cellsize);
+        
+        if (this.clicks[i][2]=='ant'){
+          this.putNewAnt(x, y, util.random(0,3));
+        }
+        
+      }
+      this.clicks = [];
+    }
+
+    // save the current board so all ants act on same basis
+    var board = this.board.slice();
+    for (var i in this.ants){
+      this.update(board, this.ants[i]);
+    }
+    
+    this.draw();
+    
+    this.counter++;
+  },
+  
+  
+  draw: function() { // drawn colors the ant makes as it makes steps
+    
+    for (var i in this.todraw){
+      
+      var colour = false;
+      
+      if (this.todraw[i][2] == 0){ // empty (background col)
+        colour = "black";
+      } else if (this.todraw[i][2] == 1){ // block (passed terrain)
+        colour = this.ants[0].colour;
+      } else if (this.todraw[i][2] == 2){ // red (head of ant)
+        colour = "red";
+      }
+      
+      this.canvas.fillStyle = colour;
+          this.canvas.fillRect((this.todraw[i][0]*this.cellsize), (this.todraw[i][1]*this.cellsize), this.cellsize, this.cellsize);
+    }
+    
+    this.todraw = [];
+  },
+
+  putBlock: function(x,y,c){
+    
+    this.board[y][x] = c;
+    this.todraw.push([x, y, c]);
+  },
+  
+  putNewAnt: function(x,y,d){
+    
+    this.ants.push(ant(x, y, d));
+    
+    this.todraw.push([x, y, 2]);
+    
+  },
+  
+  
+  update: function(board, ant){
+    
+    if (!this.running) return;
+    
+    /*
+    normal: 
+    At a black square, turn 90Â° right, flip the color of the square, move forward one unit
+    At a green square, turn 90Â° left, flip the color of the square, move forward one unit
+    */
+    
+    // what colour cell am i on?
+    if (board[ant.currY][ant.currX] == 0){
+      
+      // new square is off, turn 90 right
+      ant.currR = (ant.currR == 3) ? 0 : (ant.currR+1);
+      
+      // flip cell colour
+      this.putBlock(ant.currX, ant.currY, 1);
+      
+    } else {
+      
+      // new square is off, turn 90 right
+      ant.currR = (ant.currR == 0) ? 3 : (ant.currR-1);
+      
+      // flip cell colour
+      this.putBlock(ant.currX, ant.currY, 0);
+    }
+    
+    // 2 advance in the direction i should move
+    if (ant.currR == 0){
+      ant.currY--;
+    }
+    if (ant.currR == 1){
+      ant.currX++;
+    }
+    if (ant.currR == 2){
+      ant.currY++;
+    }
+    if (ant.currR == 3){
+      ant.currX--;
+    }
+    
+    // wrap around the background
+    if (ant.currX >= this.cols){
+      ant.currX = 0;
+    }
+    if (ant.currX < 0){
+      ant.currX = (this.cols-1);
+    }
+    if (ant.currY >= this.rows){
+      ant.currY = 0;
+    }
+    if (ant.currY < 0){
+      ant.currY = (this.rows-1);
+    }
+    
+    
+    // draw ant
+    this.todraw.push([ant.currX, ant.currY, 2]);
+    
+  },
+  
+  reset: function(){
+    
+    this.fps    = $('#c_speed').val();
+    this.cellsize   = 50;
+    
+    $('#c_speed_indicator').html($('#c_speed').val());
+    
+    this.counter = 0;
+    
+    // hold clicks somewhere
+    this.clicks = [];
+    
+    // hold to-draw items in buffer
+    this.todraw = [];
+    
+    // ants
+    this.ants = [];
+    
+    // work out canvas size
+    this.canvas_width = parseInt(window.innerWidth/this.cellsize)*this.cellsize;
+    this.canvas_height = parseInt(window.innerHeight/this.cellsize)*this.cellsize;
+    
+    // set canvas properties
+    var canvasElement = $("#canvas");
+    canvasElement.attr('width', this.canvas_width);
+    canvasElement.attr('height', this.canvas_height);
+    this.canvas = document.getElementById('canvas').getContext("2d");
+    
+    // create cell matrix
+    this.board = [];
+    this.cols = Math.floor(this.canvas_width / this.cellsize);
+    this.rows = Math.floor(this.canvas_height / this.cellsize);
+    
+    for (var i=0; i<this.rows; i++){
+      this.board[i] = [];
+      for (var j=0; j<this.cols; j++){
+        this.board[i][j] = 0;
+      }
+    }
+    
+    
+  },
+  
+  start: function(){ // set speed of movement of ants here - x/this.fps is times per fps
+    
+    this.running = true;
+    
+    this.stop();
+    this.interval = setInterval(function(){
+      anim.tick();
+    }, 5000/this.fps);
+    
+  },
+  
+  stop: function(){
+    clearInterval(this.interval);
+  },
+  
+  
+  stopRunning: function(){
+    this.running = false;
+  },
+
+  changeColor: function(color){
+    if (this.ants[0])
+      this.ants[0].colour = color;
+  }
+  
+}
+
+$(document).ready(function(){
+  anim.reset();
+  
+  // starter ant position
+  anim.ants.push(ant(anim.cols/4, anim.rows/2, util.random(0,3)));
+  anim.ants.push(ant(anim.cols*2/4, anim.rows/2, util.random(0,3)));
+  anim.ants.push(ant(anim.cols*3/4, anim.rows/2, util.random(0,3)));
+  //anim.ants.push(ant(util.random(0, (anim.cols-1)), util.random(0, (anim.rows-1)), util.random(0,3)));
+
+    
+  anim.start();
+  
+  $("#controls").click(function(e){
+    $("#controls").toggleClass('active');
+  });
+  
+  $("#canvas").click(function(e){
+      var x = e.pageX-$("#canvas").offset().left;
+      var y = e.pageY-$("#canvas").offset().top;
+      
+      var type = "ant";
+
+      //var curcolor = $('input:radio[name=c_clicking]:checked').val();
+      //anim.changeColor(curcolor);
+
+      
+      anim.clicks.push([x,y,type]);
+    });
+    
+    $('#c_stop').click(function(e){
+      anim.stopRunning();
+    });
+    $('#c_reset').click(function(e){
+      anim.reset();
+    });
+    $('#c_start').click(function(e){
+      anim.start();
+    });
+    $('#c_restart').click(function(e){
+      anim.stop();
+      anim.reset();
+      
+      // starter ants
+    //anim.ants.push(ant(util.random(0, (anim.cols-1)), util.random(0, (anim.rows-1)), util.random(0,3)));
+    anim.ants.push(ant(anim.cols/2, anim.rows/2, util.random(0,3)));
+    
+    anim.start();
+    });
+    
+    $('#c_speed').change(function(){
+      anim.stop();
+      anim.fps = $('#c_speed').val();
+      anim.start();
+      
+      $('#c_speed_indicator').html($('#c_speed').val());
+    });
+});
+</script>
+
+<div id="leftnav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeLeftNav()">&times;</a>
+  
+  <strong>Langton's Ant in JavaScript</strong>
+  <p>
+    <label>Click to create another ant!</label>
+  </p>
+
+  <p>
+    <label>Ant Speed (<span id="c_speed_indicator">60</span>)</label>
+    <br>
+    <input id="c_speed" type="range" min="1" max="100" value="60" style="width: 75%;">
+  </p>
+
+  <strong>Daniel Peter</strong>
+  <div class="avatarcontainer">
+        <img src="img/anotherselfpicture.jpg" alt="Avatar" class="image">
+  </div>
+
+  <div class="shape">
+      Aspiring Freelancer/Blockchain Developer
+  </div>
+  <div class="shape">
+      Python, Java, JS, Solidity, and more
+  </div>
+  <div class="shape">
+      Former Software Engineer
+  </div>
+  <p>
+    <div class="btn" id="c_reset" title="Current/Future Projects">Clear Ants</div>
+    -
+    <div class="btn" id="c_restart" title="My Cryptocurrency Blog">Refresh</div>
+  </p>
+</div>
+
+<div class="topheader">
+  <span style="font-size:30px;cursor:pointer;color:red" onclick="openLeftNav()">&#9776; open left</span>
+
+  <div class="btn" title="Current/Future Projects"><i class="material-icons">work</i> Resume</div>
+    <div class="btn" title="My Cryptocurrency Blog">Donate <i class="material-icons">payment</i></div>
+    <div class="btn" title="Contact Me">Contact Me <i class="material-icons">email</i></div>
+
+  <div id="rightnav" class="rightsidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeRightNav()">&times;</a>
+    <div class="btn" title="Current/Future Projects"><i class="material-icons">work</i> Resume</div>
+    <div class="btn" title="My Cryptocurrency Blog">Donate <i class="material-icons">payment</i></div>
+    <div class="btn" title="Contact Me">Contact Me <i class="material-icons">email</i></div>
+  </div>
+
+  <span id="rightnavopen" style="font-size:30px;cursor:pointer;color:red" onclick="openRightNav()">&#9776; open right</span>
+</div>
+
+<canvas id="canvas" width="1920" height="940"></canvas>
+
+<!--
+<div id="controls" class="active">
+
+  <strong>Langton's Ant in JavaScript</strong>
+  <p>
+    <label>Click to create another ant!</label>
+  </p>
+
+  <p>
+    <label>Ant Speed (<span id="c_speed_indicator">60</span>)</label>
+    <input id="c_speed" type="range" min="1" max="100" value="60" style="width: 75%;">
+  </p>
+
+  <strong>Daniel Peter</strong>
+  <div class="avatarcontainer">
+        <img src="img/anotherselfpicture.jpg" alt="Avatar" class="image">
+  </div>
+
+  <div class="shape">
+      Aspiring Freelancer/Blockchain Developer
+  </div>
+  <div class="shape">
+      Python, Java, JS, Solidity, and more
+  </div>
+  <div class="shape">
+      Former Software Engineer
+  </div>
+  <p>
+    <div class="btn" id="c_reset" title="Current/Future Projects">Clear Ants</div>
+    -
+    <div class="btn" id="c_restart" title="My Cryptocurrency Blog">Refresh</div>
+  </p>
+</div>
+-->
+
+<body>
+
+<script>
+// script for opening/closing the side bars
+document.getElementById("leftnav").style.width = "0px"
+document.getElementById("rightnav").style.width = "0px"
+
+
+function openLeftNav() {
+  if (document.getElementById("leftnav").style.width == "0px")
+    document.getElementById("leftnav").style.width = "420px";
+  else
+    closeLeftNav();
+}
+
+function openRightNav() {
+  if (document.getElementById("rightnav").style.width == "0px")
+    document.getElementById("rightnav").style.width = "420px";
+  else
+    closeRightNav();
+}
+
+function closeLeftNav() {
+    document.getElementById("leftnav").style.width = "0px";
+}
+
+function closeRightNav() {
+    document.getElementById("rightnav").style.width = "0px";
+}
+</script>
+
+<!--
+<div id="leftlabel"></div>
+  <script>
+    $('#leftlabel').load('leftlabel.html');
+  </script>
+
+<div id="rightlabel"></div>
+  <script>
+    $('#rightlabel').load('rightlabel.html');
+  </script>
+-->
+
+
+<button class="btn2" title="Langton's ant is a two-dimensional universal Turing machine that works as follows: 
+  - At a (black) square, turn 90° right, flip the color of the square, move forward one unit 
+  - At a (color chosen) square, turn 90° left, flip the color of the square, move forward one unit" >
+  <i class="material-icons" style="font-size:16px;color:white;text-shadow:2px 2px 4px #000000;">info</i> What is this?
+</button>
+
+</body>
+</html>
