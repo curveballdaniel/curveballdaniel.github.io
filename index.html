@@ -7,718 +7,682 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-  <script type="text/javascript" async="" src="http://www.google-analytics.com/ga.js"></script>
 
-  <script language="javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-2396995-2']);
-    _gaq.push(['_trackPageview']);
-  
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-<head>
-  <title>Langton's Ants in Javascript - Ross Scrivener</title>
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
   <style>
   
-  html, body { background: black; padding: 0; margin: 0; }
-  * {
+  * { margin: 0; padding: 0;}
+
+  body, html { 
+    height:100%; 
+  }
+
+  html {
+    cursor: none;
+  }
+
+  .cursor {
+    /* unselectable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
     -moz-user-select: none;
-      -webkit-user-select: none;
-      user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    z-index: 100;
+    width: 21px;
+    height: 21px;
+    position: absolute;
+    pointer-events: none;
   }
 
-  /* Container needed to position the overlay. */
-  .avatarcontainer {
-    position: relative;
-    width: 75%;
-    max-width: 300px;
-  }
-
-  /* Make the image to responsive */
-  .image {
+  .my-picture {
     display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    max-width: 200px;
+    max-height: 300px;
   }
 
-  /* first thing/nextthing/lastthing change color, position*/
-  .shape{
-    text-align:center;
-    font-size: 16px;
-    background-color:rgba(3,78,136,0.7);
-    width:300px;
-    height:60px;
-    line-height:60px;
-    color:white;
-    margin:20px auto;
-    position:relative;
-    border-radius: 0px 10px 10px 0px;
-  }
-  .shape:before{
-    content:"";
-    width:0px;
-    height:0px;
-    border-top:60px solid rgba(3,78,136,0.7);
-    border-left:60px solid transparent;
-    position:absolute;
-    right:100%;
-    top:0px;
-  }
-
-  /* format icon with text in button */
   .material-icons {
     position: relative;
-    /* Adjust these values accordingly */
     top: 4px;
     size: 50%;
   }
 
-  /* button template */
-  .btn {
-    background: #3498db;
-    background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
-    background-image: -moz-linear-gradient(top, #3498db, #2980b9);
-    background-image: -ms-linear-gradient(top, #3498db, #2980b9);
-    background-image: -o-linear-gradient(top, #3498db, #2980b9);
-    background-image: linear-gradient(to bottom, #3498db, #2980b9);
-    -webkit-border-radius: 60;
-    -moz-border-radius: 60;
-    border-radius: 60px;
-    -webkit-box-shadow: 1px 1px 3px #666666;
-    -moz-box-shadow: 1px 1px 3px #666666;
-    box-shadow: 1px 1px 3px #666666;
-    font-family: Georgia;
-    color: #ffffff;
-    font-size: 16px;
-    padding: 10px 20px 10px 20px;
-    text-decoration: none;
+  .main-canvas {
+    z-index: 0;
   }
 
-  .btn:hover {
-    background: #3cb0fd;
-    background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
-    text-decoration: none;
-  }
-  
-  #controls {
-    font-family: Verdana;
-    font-size: 90%;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
+  /* used for style, clear, and size button*/
+  .overlay-button {
+    /* unselectable text*/
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    z-index: 10;
+    background-color: gray;
+
+    font-size: 1em;
+    padding: 10px;
     color: #fff;
-    display: block;
-    position: absolute;
-    top: 0%;
-    left: -400px;
-    background: rgba(80,80,80,.9);
-    padding: 20px 30px 20px 20px;
-    width: 430px;
-    
-    transition: left .5s;
-    -moz-transition: left .5s;
-    -webkit-transition: left .5s;
-    -o-transition: left .5s;
-  }
-  #controls:hover {
-    background: rgba(100,100,100,.9);
-  }
-  #controls.active {
-    left: 0px;
-  }
-  #controls p {
-    margin: 15px 0;
-  }
-  #controls label {
-    display: block;
-    padding: 0 0 5px 0;
-  }
-  #controls:after {
-    content: ">";
-    font-weight: bold;
-    position: absolute;
-    right: 10px;
-    top: 45%;
-  }
-  #controls.active:after {
-    content: "<";
-  }
-
-  /* opening left label */
-  .sidenav {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0; /* only diff here for right and left */
-    background-color: #ffffff;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 40px;
-    padding-left: 30px;
-    opacity: 0.9;
-
-    border-radius: 10px 50px 10px 0px;
-  }
-
-  .sidenav a {
-    padding: 8px 8px 8px 32px;
+    border: 2px solid black;
+    border-radius: 20px/50px;
     text-decoration: none;
-    font-size: 24px;
-    color: #818181;
-    display: block;
-    transition: 0.3s;
+    transition: all 0.3s ease-out;
+
+    height: 50;
+    width: 50;
   }
 
-  .sidenav a:hover {
-    color: #f1f1f1;
+  /* used for donate + contact me buttons */
+  .personal-button {
+    /* unselectable text*/
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    z-index: 10;
+    background-color: aqua;
+
+    font-size: 1em;
+    padding: 10px;
+    color: #fff;
+    border: 2px solid black;
+    border-radius: 20px/50px;
+    text-decoration: none;
+    transition: all 0.3s ease-out;
+
+    height: 50;
+    width: 50;
   }
 
-  .sidenav .closebtn {
+  .change-size-button:hover {
+    color: black;
+    background: gray;
+  }
+
+  .color-panel {
+    z-index: 10;
     position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
+    top: 0px;
+    left: 300px;
   }
 
-  @media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-  }
-
-    /* opening right label */
-  .rightsidenav {
-    height: 100%;
+  /* personal picture + information popout */
+  .pop-out {
     width: 0;
     position: fixed;
     z-index: 1;
     top: 0;
     right: 0; /* only diff here for right and left */
-    background-color: #ffffff;
+    background: url("img/tiled-mosaic-bg.png");
     overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 40px;
     opacity: 0.9;
-    border-radius: 50px 10px 0px 10px;
+
+    /*pointer-events: none;*/
+
+    border-radius: 15px 0px 15px 35px;
   }
 
-  .rightsidenav a {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-    transition: 0.3s;
+  .pop-out .body {
+    margin-left: 15%;
   }
 
-  .rightsidenav a:hover {
-    color: #f1f1f1;
-  }
-
-  .rightsidenav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-  }
-
-  @media screen and (max-height: 450px) {
-  .rightsidenav {padding-top: 15px;}
-  .rightsidenav a {font-size: 18px;}
-  }
-
-  .rightnavopen {  
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    /* bring your own prefixes */
-    transform: translate(-50%, -50%);
-  }
-
-  .topheader {
-    margin: auto;
-    width: 50%;
-    border: 3px solid green; /* please remove this */
-    padding: 10px;
+  div.center-text {
     text-align: center;
   }
 
-  /* background image */
-  body, html {
-    height: 100%;
-  } 
-
-  * {box-sizing: border-box}
-
-  .btn2 {
-    background-color: DodgerBlue; /* Blue background */
-    border: none; /* Remove borders */
-    color: white; /* White text */
-    font-size: 16px; /* Set a font size */
-    cursor: pointer; /* Mouse pointer on hover */
-    
+  .center-text p{
+    margin: 0px;
   }
 
-  /* Darker background on mouse-over */
-  .btn2:hover {
-      background-color: RoyalBlue;
+  .copy-button {
+    display: inline-block;
+
+    background: url("https://image.flaticon.com/icons/png/128/130/130992.png");
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+ }
+
+ .external-link-button {
+    display: inline-block;
+
+    background: url("img/external-link-img.png");
+    background-size: cover;
+
+    width: 8px;
+    height: 8px;
+ }
+
+  /* Website Load Pop up */
+  .button {
+    /* unselectable text */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    
+    /* center button */
+    cursor: pointer;
+    top: 25px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    position: absolute;
+    font-size: 1em;
+    padding: 10px;
+    color: #fff;
+    border: 2px solid black;
+    border-radius: 20px/50px;
+    text-decoration: none;
+    transition: all 0.3s ease-out;
+  }
+  .button:hover {
+    color: black;
+    background: gray;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    visibility: visible;
+    opacity: 1;
+  }
+  .overlay:target {
+    visibility: hidden;
+    opacity: 0;
+    display:none
+  }
+  .popup {
+    margin: 70px auto;
+    padding: 20px;
+    background: url("img/tiled-mosaic-bg.png");
+    border-radius: 15px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+  }
+  .popup h2 {
+    margin-top: 0;
+    color: #333;
+    font-family: Tahoma, Arial, sans-serif;
+  }
+  .popup .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+  }
+  .popup .close:hover {
+    color: orange;
+  }
+  .popup .content {
+    max-height: 40%;
+    overflow: auto;
+    text-align: left;
   }
 
   </style>
-</head>
-<body>
-
-<!-- background picture (tiled x and y in css) -->
-
-<script type="text/javascript">
-// credit to http://rossscrivener.co.uk/projects/langtons-ants/ for idea
-
-var util = util || {}
-
-util.fps = {
-  frametimes: [],
-  add: function(){
-    if (this.frametimes.length > 30) 
-      this.frametimes.splice(0, 1);
-    var currTime = new Date().getTime();
-    this.frametimes.push(currTime);
-    return Math.round(1000 / ((currTime - this.frametimes[0]) / (this.frametimes.length - 1)));
-  }
-}
-
-// return a random number in range
-util.random = function(minVal, maxVal, floatVal){
-  var randVal = minVal + (Math.random() * (maxVal-minVal));
-  return typeof floatVal == 'undefined' ? Math.round(randVal):randVal.toFixed(floatVal);
-}
-
-var ant = function(x, y, r, t){
-  nextcol = util.random(0,3);
-  if (nextcol == 0)
-    colour = "green";
-  else if (nextcol == 1)
-    colour = "blue";
-  else if (nextcol == 2)
-    colour = "yellow";
-  else 
-    colour = "gray";
-  return { currX: x, currY: y, currR: r, type: t, colour: colour }
-}
-
-var anim = {
-  
-  interval: false,
-  
-  tick: function(){
-
-    // detect any clicks to add new ants
-    if (this.clicks.length > 0){
-      for(var i in this.clicks){
-        
-        var x = Math.floor(this.clicks[i][0] / this.cellsize);
-          var y = Math.floor(this.clicks[i][1] / this.cellsize);
-        
-        if (this.clicks[i][2]=='ant'){
-          this.putNewAnt(x, y, util.random(0,3));
-        }
-        
-      }
-      this.clicks = [];
-    }
-
-    // save the current board so all ants act on same basis
-    var board = this.board.slice();
-    for (var i in this.ants){
-      this.update(board, this.ants[i]);
-    }
-    
-    this.draw();
-    
-    this.counter++;
-  },
-  
-  
-  draw: function() { // drawn colors the ant makes as it makes steps
-    
-    for (var i in this.todraw){
-      
-      var colour = false;
-      
-      if (this.todraw[i][2] == 0){ // empty (background col)
-        colour = "black";
-      } else if (this.todraw[i][2] == 1){ // block (passed terrain)
-        colour = this.ants[0].colour;
-      } else if (this.todraw[i][2] == 2){ // red (head of ant)
-        colour = "red";
-      }
-      
-      this.canvas.fillStyle = colour;
-          this.canvas.fillRect((this.todraw[i][0]*this.cellsize), (this.todraw[i][1]*this.cellsize), this.cellsize, this.cellsize);
-    }
-    
-    this.todraw = [];
-  },
-
-  putBlock: function(x,y,c){
-    
-    this.board[y][x] = c;
-    this.todraw.push([x, y, c]);
-  },
-  
-  putNewAnt: function(x,y,d){
-    
-    this.ants.push(ant(x, y, d));
-    
-    this.todraw.push([x, y, 2]);
-    
-  },
-  
-  
-  update: function(board, ant){
-    
-    if (!this.running) return;
-    
-    /*
-    normal: 
-    At a black square, turn 90Â° right, flip the color of the square, move forward one unit
-    At a green square, turn 90Â° left, flip the color of the square, move forward one unit
-    */
-    
-    // what colour cell am i on?
-    if (board[ant.currY][ant.currX] == 0){
-      
-      // new square is off, turn 90 right
-      ant.currR = (ant.currR == 3) ? 0 : (ant.currR+1);
-      
-      // flip cell colour
-      this.putBlock(ant.currX, ant.currY, 1);
-      
-    } else {
-      
-      // new square is off, turn 90 right
-      ant.currR = (ant.currR == 0) ? 3 : (ant.currR-1);
-      
-      // flip cell colour
-      this.putBlock(ant.currX, ant.currY, 0);
-    }
-    
-    // 2 advance in the direction i should move
-    if (ant.currR == 0){
-      ant.currY--;
-    }
-    if (ant.currR == 1){
-      ant.currX++;
-    }
-    if (ant.currR == 2){
-      ant.currY++;
-    }
-    if (ant.currR == 3){
-      ant.currX--;
-    }
-    
-    // wrap around the background
-    if (ant.currX >= this.cols){
-      ant.currX = 0;
-    }
-    if (ant.currX < 0){
-      ant.currX = (this.cols-1);
-    }
-    if (ant.currY >= this.rows){
-      ant.currY = 0;
-    }
-    if (ant.currY < 0){
-      ant.currY = (this.rows-1);
-    }
-    
-    
-    // draw ant
-    this.todraw.push([ant.currX, ant.currY, 2]);
-    
-  },
-  
-  reset: function(){
-    
-    this.fps    = $('#c_speed').val();
-    this.cellsize   = 50;
-    
-    $('#c_speed_indicator').html($('#c_speed').val());
-    
-    this.counter = 0;
-    
-    // hold clicks somewhere
-    this.clicks = [];
-    
-    // hold to-draw items in buffer
-    this.todraw = [];
-    
-    // ants
-    this.ants = [];
-    
-    // work out canvas size
-    this.canvas_width = parseInt(window.innerWidth/this.cellsize)*this.cellsize;
-    this.canvas_height = parseInt(window.innerHeight/this.cellsize)*this.cellsize;
-    
-    // set canvas properties
-    var canvasElement = $("#canvas");
-    canvasElement.attr('width', this.canvas_width);
-    canvasElement.attr('height', this.canvas_height);
-    this.canvas = document.getElementById('canvas').getContext("2d");
-    
-    // create cell matrix
-    this.board = [];
-    this.cols = Math.floor(this.canvas_width / this.cellsize);
-    this.rows = Math.floor(this.canvas_height / this.cellsize);
-    
-    for (var i=0; i<this.rows; i++){
-      this.board[i] = [];
-      for (var j=0; j<this.cols; j++){
-        this.board[i][j] = 0;
-      }
-    }
-    
-    
-  },
-  
-  start: function(){ // set speed of movement of ants here - x/this.fps is times per fps
-    
-    this.running = true;
-    
-    this.stop();
-    this.interval = setInterval(function(){
-      anim.tick();
-    }, 5000/this.fps);
-    
-  },
-  
-  stop: function(){
-    clearInterval(this.interval);
-  },
-  
-  
-  stopRunning: function(){
-    this.running = false;
-  },
-
-  changeColor: function(color){
-    if (this.ants[0])
-      this.ants[0].colour = color;
-  }
-  
-}
-
-$(document).ready(function(){
-  anim.reset();
-  
-  // starter ant position
-  anim.ants.push(ant(anim.cols/4, anim.rows/2, util.random(0,3)));
-  anim.ants.push(ant(anim.cols*2/4, anim.rows/2, util.random(0,3)));
-  anim.ants.push(ant(anim.cols*3/4, anim.rows/2, util.random(0,3)));
-  //anim.ants.push(ant(util.random(0, (anim.cols-1)), util.random(0, (anim.rows-1)), util.random(0,3)));
-
-    
-  anim.start();
-  
-  $("#controls").click(function(e){
-    $("#controls").toggleClass('active');
-  });
-  
-  $("#canvas").click(function(e){
-      var x = e.pageX-$("#canvas").offset().left;
-      var y = e.pageY-$("#canvas").offset().top;
-      
-      var type = "ant";
-
-      //var curcolor = $('input:radio[name=c_clicking]:checked').val();
-      //anim.changeColor(curcolor);
-
-      
-      anim.clicks.push([x,y,type]);
-    });
-    
-    $('#c_stop').click(function(e){
-      anim.stopRunning();
-    });
-    $('#c_reset').click(function(e){
-      anim.reset();
-    });
-    $('#c_start').click(function(e){
-      anim.start();
-    });
-    $('#c_restart').click(function(e){
-      anim.stop();
-      anim.reset();
-      
-      // starter ants
-    //anim.ants.push(ant(util.random(0, (anim.cols-1)), util.random(0, (anim.rows-1)), util.random(0,3)));
-    anim.ants.push(ant(anim.cols/2, anim.rows/2, util.random(0,3)));
-    
-    anim.start();
-    });
-    
-    $('#c_speed').change(function(){
-      anim.stop();
-      anim.fps = $('#c_speed').val();
-      anim.start();
-      
-      $('#c_speed_indicator').html($('#c_speed').val());
-    });
-});
-</script>
-
-<div id="leftnav" class="sidenav">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeLeftNav()">&times;</a>
-  
-  <strong>Langton's Ant in JavaScript</strong>
-  <p>
-    <label>Click to create another ant!</label>
-  </p>
-
-  <p>
-    <label>Ant Speed (<span id="c_speed_indicator">60</span>)</label>
-    <br>
-    <input id="c_speed" type="range" min="1" max="100" value="60" style="width: 75%;">
-  </p>
-
-  <strong>Daniel Peter</strong>
-  <div class="avatarcontainer">
-        <img src="img/anotherselfpicture.jpg" alt="Avatar" class="image">
-  </div>
-
-  <div class="shape">
-      Aspiring Freelancer/Blockchain Developer
-  </div>
-  <div class="shape">
-      Python, Java, JS, Solidity, and more
-  </div>
-  <div class="shape">
-      Former Software Engineer
-  </div>
-  <p>
-    <div class="btn" id="c_reset" title="Current/Future Projects">Clear Ants</div>
-    -
-    <div class="btn" id="c_restart" title="My Cryptocurrency Blog">Refresh</div>
-  </p>
-</div>
-
-<div class="topheader">
-  <span style="font-size:30px;cursor:pointer;color:red" onclick="openLeftNav()">&#9776; open left</span>
-
-  <div class="btn" title="Current/Future Projects"><i class="material-icons">work</i> Resume</div>
-    <div class="btn" title="My Cryptocurrency Blog">Donate <i class="material-icons">payment</i></div>
-    <div class="btn" title="Contact Me">Contact Me <i class="material-icons">email</i></div>
-
-  <div id="rightnav" class="rightsidenav">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeRightNav()">&times;</a>
-    <div class="btn" title="Current/Future Projects"><i class="material-icons">work</i> Resume</div>
-    <div class="btn" title="My Cryptocurrency Blog">Donate <i class="material-icons">payment</i></div>
-    <div class="btn" title="Contact Me">Contact Me <i class="material-icons">email</i></div>
-  </div>
-
-  <span id="rightnavopen" style="font-size:30px;cursor:pointer;color:red" onclick="openRightNav()">&#9776; open right</span>
-</div>
-
-<canvas id="canvas" width="1920" height="940"></canvas>
-
-<!--
-<div id="controls" class="active">
-
-  <strong>Langton's Ant in JavaScript</strong>
-  <p>
-    <label>Click to create another ant!</label>
-  </p>
-
-  <p>
-    <label>Ant Speed (<span id="c_speed_indicator">60</span>)</label>
-    <input id="c_speed" type="range" min="1" max="100" value="60" style="width: 75%;">
-  </p>
-
-  <strong>Daniel Peter</strong>
-  <div class="avatarcontainer">
-        <img src="img/anotherselfpicture.jpg" alt="Avatar" class="image">
-  </div>
-
-  <div class="shape">
-      Aspiring Freelancer/Blockchain Developer
-  </div>
-  <div class="shape">
-      Python, Java, JS, Solidity, and more
-  </div>
-  <div class="shape">
-      Former Software Engineer
-  </div>
-  <p>
-    <div class="btn" id="c_reset" title="Current/Future Projects">Clear Ants</div>
-    -
-    <div class="btn" id="c_restart" title="My Cryptocurrency Blog">Refresh</div>
-  </p>
-</div>
--->
 
 <body>
+
+<!-- Website load Popup-->
+<div class="box">
+    <a class="button" href="#">What's This?</a>
+</div> 
+
+<div id="draw" class="overlay">
+  <div class="popup center-text">
+    <h2>Welcome!</h2>
+    <a class="close" href="#draw">×</a>
+    <div class="content">
+      <ul>
+        <li><strong>- This page was created to allow anyone to draw anything they'd like - on anything they'd like.</strong></li> 
+        <br/>
+        <li>Feel free to import your own image, doodle anything on it, and save it to show others.</li>
+        <br/>
+        <li><strong>- If nothing immediately comes to mind, look through any default images or browse the "portfolio" to view what others have created.</strong></li>
+        <br/>
+        <li>Draw anything awesome? Send me your finest artwork and it may find its way on the main portfolio!</li>
+        <br/>
+        <li><strong>- If you're interested to find out more about me, click on the "Who am I?" button.</strong></li>
+        <br/>
+        Enjoy your stay!
+      </ul>
+    </div>
+  </div>
+</div>  
+
+<!-- Main Canvas-->
+<canvas id="background-canvas" class="main-canvas">
+</canvas>
+
+<div id="cursor"></div>
+<image src="img/pencil-png-icon-transparent.png" id="cursor-icon" class="cursor">
+
+<div class="color-chosing-wrapper"></div>
+<!-- span -->
+<a class="overlay-button" id="pop-out-button" onclick="openPopOut()">Who am I?</a>
+<a class="overlay-button" id="draw-size-button" onclick="changeDrawingSize()">Small</a>
+<a class="overlay-button" id="eraser-button" onclick="changeToEraser()">Pen</a>
+<a class="overlay-button" id="clear-button" onclick="clearCanvas()">Clear Canvas</a>
+<a class="overlay-button" id="save-image-button" download="MyDoodle.jpg">Save Image</a>
+<!--<input class="overlay-button" type='file' id="image-file-upload"/>-->
+<a class="overlay-button" id="load-image-button" onclick="loadImage()">Load Image</a>
+
+<div id="pop-out" class="pop-out">
+  <br/>
+  <div class="avatar-container">
+        <img src="img/anotherselfpicture.jpg" alt="Me" class="my-picture">
+  </div>
+  <br/>
+
+  <div class="center-text">
+    <strong>Daniel Peter</strong>
+  </div>
+  
+  <div class="body">
+    
+    <!-- cryptocurrency enthusiast, etc. -->
+    <ul>
+        <li>Blockchain Developer</li>
+        <li>JS, Python, Java, Solidity, and more</li>
+        <li>View my LinkedIn <a class="external-link-button" href="https://www.linkedin.com/in/daniel-peter-136a18159/" target="_blank"></a></li>
+    </ul>
+    <!-- bonus tip - has watched the longest world series game from start to finish -->
+  </div>
+
+  <div class="center-text">
+    <strong>More Info</strong>
+  </div>
+
+  <div class="body">
+    <!-- cryptocurrency enthusiast, etc. -->
+    <ul>
+        <li>Cryptocurrency Enthusiast</li>
+        <li>Boston Sports Fan</li>
+        <li></li>
+    </ul>
+    <!-- bonus tip - has watched the longest world series game from start to finish -->
+  </div>
+
+  <div class="center-text">
+    <strong>Thank you!</strong>
+    <p>BTC: <span style="font-size: 10px;">3Df74GxqhC3LsDkDJSw9UkVvbNzKQJvNvW</span><span id="btc-donate-button" class="copy-button" onclick="copyBTC('btc-donate-button')"></span></p>
+    <p>ETH: <span style="font-size: 10px;">0x8d881190121D1e23e9db3f88E3B42962B0f55A78</span><span id="eth-donate-button" class="copy-button" onclick="copyETH('eth-donate-button')"></span></p>
+    <p>NANO: <span style="font-size: 10px;">xrb_3x74q9wno6bb3zgt8s9gy9z6jw8wya4s4cf3zzwebpt41wqy1iy4q4b1fbcu</span><span id="xrb-donate-button" class="copy-button" onclick="copyXRB('xrb-donate-button')"></span></p>
+  </div>
+
+  <br/>
+  <div class="center-text">
+    <strong>Contact Me</strong>
+    <p>Email: danielipeter56@gmail.com <a class="external-link-button" href="mailto:danilipeter56@gmail.com" target="_blank"></a></p>
+  </div>
+</div>
 
 <script>
-// script for opening/closing the side bars
-document.getElementById("leftnav").style.width = "0px"
-document.getElementById("rightnav").style.width = "0px"
+  // start hidden
+document.getElementById("pop-out").style.width = "0px";
 
+// entire popout section w/ info + pic
 
-function openLeftNav() {
-  if (document.getElementById("leftnav").style.width == "0px")
-    document.getElementById("leftnav").style.width = "420px";
-  else
-    closeLeftNav();
+function openPopOut() {
+  if (document.getElementById("pop-out").style.width == "0px"){
+    document.getElementById("pop-out-button").innerHTML = "Close Pop-out";
+    document.getElementById("pop-out-button").style.background = "red";
+    document.getElementById("pop-out").style.width = "420px";
+    document.getElementById("pop-out").style.height = "680px";
+  }
+  else {
+    document.getElementById("pop-out-button").innerHTML = "Who am I?";
+    document.getElementById("pop-out-button").style.background = "gray";
+    document.getElementById("pop-out").style.width = "0px";
+  }
 }
 
-function openRightNav() {
-  if (document.getElementById("rightnav").style.width == "0px")
-    document.getElementById("rightnav").style.width = "420px";
-  else
-    closeRightNav();
+// save image function - saves name of file from download att - MyDoodle.jpg
+function saveImage(){
+  var canvas = document.getElementById("background-canvas");
+  var image = canvas.toDataURL("image/png");
+  this.href = image;
 }
 
-function closeLeftNav() {
-    document.getElementById("leftnav").style.width = "0px";
+// load image function - 
+var fileUpload = document.getElementById('image-file-upload');
+var canvas  = document.getElementById('background-canvas');
+var ctx = canvas.getContext("2d");
+
+function loadImage(){
+  if ( this.files && this.files[0] ) {
+    var FR= new FileReader();
+    FR.onload = function(e) {
+       var img = new Image();
+       img.src = e.target.result;
+       img.onload = function() {
+         ctx.drawImage(img, 0, 0, 512, 512);
+       };
+    };       
+    FR.readAsDataURL( this.files[0] );
+  }
 }
 
-function closeRightNav() {
-    document.getElementById("rightnav").style.width = "0px";
+//fileUpload.onchange = loadImage;
+
+
+
+// tie download link on save-image-button to the saveImage function
+document.getElementById("save-image-button").addEventListener('click', saveImage, false);
+
+
+// donate copy buttons
+
+function copyTextToClipboard(text, id) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  document.execCommand('copy');
+
+  // turn copy into checkmark
+  document.getElementById(id).style.background ='url("img/checkmark.png")';
+  document.getElementById(id).style.backgroundSize = 'cover';
+
+  document.body.removeChild(textArea);
 }
+
+function copyBTC(id){
+  copyTextToClipboard("3Df74GxqhC3LsDkDJSw9UkVvbNzKQJvNvW", id);
+}
+
+function copyETH(id){
+  copyTextToClipboard("0x8d881190121D1e23e9db3f88E3B42962B0f55A78", id);
+}
+
+function copyXRB(id){
+  copyTextToClipboard("xrb_3x74q9wno6bb3zgt8s9gy9z6jw8wya4s4cf3zzwebpt41wqy1iy4q4b1fbcu", id);
+}
+
 </script>
 
-<!--
-<div id="leftlabel"></div>
-  <script>
-    $('#leftlabel').load('leftlabel.html');
-  </script>
+<script>
 
-<div id="rightlabel"></div>
-  <script>
-    $('#rightlabel').load('rightlabel.html');
-  </script>
--->
+var dimension = [document.documentElement.clientWidth, document.documentElement.clientHeight];
+var mainCanvas = document.getElementById("background-canvas");
+mainCanvas.width = dimension[0] - 30;
+mainCanvas.height = dimension[1] - 30;
+
+// drawing color
+var curColor = "blue";
+var clickColor = new Array();
+
+// drawing/eraser size
+var clickSize = new Array();
+var curSize = "normal";
+
+// type of tool used
+var clickTool = new Array();
+var curTool = "marker"; // eraser
+
+// x/y + mouse icon
+var clickX = new Array();
+var clickY = new Array();
+var clickDrag = new Array();
+var paint;
+var cursorIcon = document.getElementById("cursor-icon"); // cursor image
+
+function changeToEraser(){
+  if (curTool === "marker"){
+    curTool = "eraser";
+    document.getElementById("eraser-button").innerHTML = "Eraser";
+    cursorIcon.src = "img/eraser-png-icon-transparent.png";
+  }
+  else if (curTool === "eraser"){
+    curTool = "marker";
+    document.getElementById("eraser-button").innerHTML = "Pen";
+    cursorIcon.src = "img/pencil-png-icon-transparent.png";
+  }
+}
+
+function changeDrawingSize(){
+  if (curSize === "huge"){
+    curSize = "normal";
+    document.getElementById("draw-size-button").innerHTML = "Small";
+  }
+  else if (curSize === "normal"){
+    curSize = "large";
+    document.getElementById("draw-size-button").innerHTML = "Medium";
+  } 
+  else if (curSize === "large"){
+    curSize = "huge";
+    document.getElementById("draw-size-button").innerHTML = "Large";
+  }
+}
+
+function changeDrawingColor(color){
+  if (curTool === "eraser"){
+    curTool = "marker";
+    document.getElementById("eraser-button").innerHTML = "Pen";
+    cursorIcon.src = "img/pencil-png-icon-transparent.png";
+  }
+
+  curColor = color;
+}
+
+function clearCanvas(){
+  context = mainCanvas.getContext("2d");
+
+  clickColor = new Array();
+  clickSize = new Array();
+  clickTool = new Array();
+  clickX = new Array();
+  clickY = new Array();
+  clickDrag = new Array();
+
+  context.clearRect(0, 0, dimension[0], dimension[1]);
+}
+
+function addClick(x, y, dragging){
+  clickX.push(x);
+  clickY.push(y);
+  clickDrag.push(dragging);
+  if(curTool == "eraser"){
+    clickColor.push("white");
+  }else{
+    clickColor.push(curColor);
+  }
+  clickSize.push(curSize);
+}
+
+context = document.getElementById('background-canvas').getContext("2d");
+
+$('#background-canvas').mousedown(function(e){
+  var mouseX = e.pageX - this.offsetLeft;
+  var mouseY = e.pageY - this.offsetTop;
+    
+  paint = true;
+  addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+  redraw();
+});
+
+// TODO: add NO DRAWING on top of the buttons/layout
+
+$('#background-canvas').mousemove(function(e){
+  if(paint){
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+    redraw();
+  }
+});
+
+$('#background-canvas').mouseup(function(e){
+  paint = false;
+});
+
+$('#background-canvas').mouseleave(function(e){
+  paint = false;
+});
+
+function redraw(){
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+  
+  context.lineJoin = "round";
+      
+  var radius;
+  for(var i=0; i < clickX.length; i++) {    
+    context.beginPath();
+    if(clickDrag[i] && i){
+      context.moveTo(clickX[i-1], clickY[i-1]);
+     }else{
+       context.moveTo(clickX[i]-1, clickY[i]);
+     }
+
+    if(clickSize[i] == "normal"){
+      radius = 5;
+    }else if(clickSize[i] == "large"){
+      radius = 10;
+    }else if(clickSize[i] == "huge"){
+      radius = 20;
+    }else{
+      alert("Error: Radius is zero for click " + i);
+      radius = 0; 
+    }
+     context.lineTo(clickX[i], clickY[i]);
+     context.closePath();
+     context.strokeStyle = clickColor[i];
+     context.lineWidth = radius;
+     context.stroke();
+  }
+}
+
+// cursor icon + code
+$(function() {
+
+    //var cursor = $('#cursor');
+    var cursorIcon = $('.cursor');
+    var html = $('html');
 
 
-<button class="btn2" title="Langton's ant is a two-dimensional universal Turing machine that works as follows: 
-  - At a (black) square, turn 90° right, flip the color of the square, move forward one unit 
-  - At a (color chosen) square, turn 90° left, flip the color of the square, move forward one unit" >
-  <i class="material-icons" style="font-size:16px;color:white;text-shadow:2px 2px 4px #000000;">info</i> What is this?
-</button>
+    var xo = 0;
+    var yo = 0;
+
+    var refresh = function(event) {
+
+        cursorIcon.css({
+            left: event.clientX - xo,
+            top: event.clientY - yo - 21 // subtract image actual height so pencil bottom is right on cursor
+        });
+
+    };
+
+    html.mousemove(function(event) {
+
+        refresh(event);
+
+    });
+
+});
+
+// create color box
+
+var colorWrapper = $('.color-chosing-wrapper');
+
+var topColorArray = ["red", "orange", "yellow", "lime", "aqua", "blue", "fuchsia", "gray"];
+var bottomColorArray = ["maroon", "brown", "olive", "green", "teal", "navy", "purple", "black"];
+
+createColorRows(topColorArray, 0);
+createColorRows(bottomColorArray, 18);
+formatToolbarButtons();
+
+function createColorRows(colorArray, height){
+  var colorIndex = 0;
+
+  for (i = 0; i < colorArray.length; i++){
+    createColorBoxes(colorArray[colorIndex], i * 18, height);
+    colorIndex++;
+  }
+}
+
+function createColorBoxes(color, x, y){
+
+  var currentColor = color;
+  var currentColorID = "color-pick-" + currentColor;
+
+  var currentColorBox = '<span class="color-selector" id="' + currentColorID + '" onclick="changeDrawingColor(\'' + currentColor + '\')"></span>';
+  colorWrapper.append(currentColorBox);
+
+  // set css color, location, and dimensions
+  $('#' + currentColorID).css({
+    top: y,
+    left: x + 238,
+    position: 'absolute',
+
+    width: 18,
+    height: 18,
+    background: currentColor
+  });
+}
+
+function formatToolbarButtons(){
+  var changeClearButton = document.getElementById("clear-button");
+  changeClearButton.style.position = 'absolute';
+  changeClearButton.style.left = 130 + 'px';
+  changeClearButton.style.top = 36 + 'px';
+
+  var changePopOutButton = document.getElementById("pop-out-button");
+  changePopOutButton.style.position = 'absolute';
+  changePopOutButton.style.left = 0 + 'px';
+  changePopOutButton.style.top = 36 + 'px';
+
+  var changeSizeButton = document.getElementById("draw-size-button");
+  changeSizeButton.style.position = 'absolute';
+  changeSizeButton.style.left = 260 + 'px';
+  changeSizeButton.style.top = 36 + 'px';
+
+  var changeEraserButton = document.getElementById("eraser-button");
+  changeEraserButton.style.position = 'absolute';
+  changeEraserButton.style.left = 350 + 'px';
+  changeEraserButton.style.top = 36 + 'px';
+
+  var changeSaveImageButton = document.getElementById("save-image-button");
+  changeSaveImageButton.style.position = 'absolute';
+  changeSaveImageButton.style.left = 130 + 'px';
+  changeSaveImageButton.style.top = 90 + 'px';
+
+  var changeLoadImageButton = document.getElementById("load-image-button");
+  changeLoadImageButton.style.position = 'absolute';
+  changeLoadImageButton.style.left = 0 + 'px';
+  changeLoadImageButton.style.top = 90 + 'px';
+}
+
+// todo: add "eraser erases THROUGH any background image input"
+// add popup which allows to import image from link, or image from your files
+// then add place to look through backgrounds to use as bases
+// then add portfolio button which shows all created images w/ doodles
+</script>
+
 
 </body>
 </html>
