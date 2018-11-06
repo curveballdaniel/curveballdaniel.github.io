@@ -57,6 +57,13 @@
     z-index: 0;
   }
 
+  .background-image-canvas {
+  	top: 0;
+  	left: 0;
+  	position: absolute;
+    z-index: 0;
+  }
+
   /* used for style, clear, and size button*/
   .overlay-button {
     /* unselectable text*/
@@ -280,6 +287,7 @@
 <canvas id="background-canvas" class="main-canvas">
 </canvas>
 
+
 <div id="cursor"></div>
 <image src="img/pencil-png-icon-transparent.png" id="cursor-icon" class="cursor">
 
@@ -290,8 +298,7 @@
 <a class="overlay-button" id="eraser-button" onclick="changeToEraser()">Pen</a>
 <a class="overlay-button" id="clear-button" onclick="clearCanvas()">Clear Canvas</a>
 <a class="overlay-button" id="save-image-button" download="MyDoodle.jpg">Save Image</a>
-<!--<input class="overlay-button" type='file' id="image-file-upload"/>-->
-<a class="overlay-button" id="load-image-button" onclick="loadImage()">Load Image</a>
+<input class="overlay-button" type='file' id="image-file-upload"/>
 
 <div id="pop-out" class="pop-out">
   <br/>
@@ -354,9 +361,8 @@ function openPopOut() {
     document.getElementById("pop-out-button").innerHTML = "Close Pop-out";
     document.getElementById("pop-out-button").style.background = "red";
     document.getElementById("pop-out").style.width = "420px";
-    document.getElementById("pop-out").style.height = "680px";
-  }
-  else {
+    document.getElementById("pop-out").style.height = "710px";
+  } else {
     document.getElementById("pop-out-button").innerHTML = "Who am I?";
     document.getElementById("pop-out-button").style.background = "gray";
     document.getElementById("pop-out").style.width = "0px";
@@ -368,28 +374,46 @@ function saveImage(){
   var canvas = document.getElementById("background-canvas");
   var image = canvas.toDataURL("image/png");
   this.href = image;
+
+  /* 
+  // code to save two canvases as one image
+  can1 = document.getElementById("broadcanvas");
+ctx1 = can1.getContext("2d");
+var coll = document.getElementById("layer2");
+var ctx2 = coll.getContext("2d");
+ctx1.drawImage(ctx2, 0, 0);
+var image = can1.toDataURL("image/png");  
+*/
 }
 
 // load image function - 
 var fileUpload = document.getElementById('image-file-upload');
-var canvas  = document.getElementById('background-canvas');
-var ctx = canvas.getContext("2d");
 
 function loadImage(){
+  // not main canvas
+  var canvas  = document.getElementById('background-canvas');
+  var ctx = canvas.getContext("2d");
+
   if ( this.files && this.files[0] ) {
+    
     var FR= new FileReader();
     FR.onload = function(e) {
+       canvas.style.backgroundImage = "url(" + e.target.result + ")";
+   	   
+   	   /*
+   	   // old save to canvas code
        var img = new Image();
        img.src = e.target.result;
        img.onload = function() {
-         ctx.drawImage(img, 0, 0, 512, 512);
+         //ctx.drawImage(img, document.documentElement.clientWidth / 4, 0, 512, 512);
        };
+       */
     };       
     FR.readAsDataURL( this.files[0] );
   }
 }
 
-//fileUpload.onchange = loadImage;
+fileUpload.onchange = loadImage;
 
 
 
@@ -503,6 +527,9 @@ function clearCanvas(){
   clickDrag = new Array();
 
   context.clearRect(0, 0, dimension[0], dimension[1]);
+
+  // clear any background image if any exists on canvas
+  mainCanvas.style.backgroundImage = "none";
 }
 
 function addClick(x, y, dragging){
@@ -671,16 +698,28 @@ function formatToolbarButtons(){
   changeSaveImageButton.style.left = 130 + 'px';
   changeSaveImageButton.style.top = 90 + 'px';
 
-  var changeLoadImageButton = document.getElementById("load-image-button");
+  var changeLoadImageButton = document.getElementById("image-file-upload");
   changeLoadImageButton.style.position = 'absolute';
   changeLoadImageButton.style.left = 0 + 'px';
-  changeLoadImageButton.style.top = 90 + 'px';
+  changeLoadImageButton.style.top = 144 + 'px';
 }
 
 // todo: add "eraser erases THROUGH any background image input"
 // add popup which allows to import image from link, or image from your files
 // then add place to look through backgrounds to use as bases
 // then add portfolio button which shows all created images w/ doodles
+// two different clear canvas buttons - one which clears background + image drawn, and one which only clears add on drawing to image (user array)
+
+/*
+
+// make sure to get the actual value form the css - may be deleted from canvas and not shown
+Create an in-memory canvas just as big as your normal canvas. Call it can2
+ctx2.drawImage(can1, 0, 0) // paint first canvas onto new canvas
+ctx.clearRect(0, 0, width, height) // clear first canvas
+ctx.drawImage(background, 0, 0) // draw image on first canvas
+ctx.drawImage(can2, 0, 0) // draw the (saved) first canvas back to itself
+
+*/
 </script>
 
 
