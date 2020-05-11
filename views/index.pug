@@ -1,0 +1,54 @@
+extends layout
+
+block variables
+  - var title = "Home"
+
+block content
+  script(src="pixel-letters.js", type="text/javascript")
+  script(src="langtons-ant.js", type="text/javascript")
+  canvas(id="langtons-ant" width="900" height="940")
+
+
+  .bottom-right-notification
+    .nes-container.is-dark.with-title
+      p.title Welcome! A little about me:
+      p
+        | Software Engineer, Blockchain Developer, Chief Blockchain Developer, Freelancer, card game/RPG enthusiast and more!
+      p
+        | Contact me:
+        br
+        | danielipeter56@gmail.com
+
+
+  .bottom-left-notification
+    .nes-container.is-dark.with-title#controls.active
+      p.title What is this?
+      p
+        | An example of Langton's Ants in Javascript
+      p
+        input.nes-btn.is-error#pause-animation-button(type='button' value='Stop')
+        |
+        input.nes-btn.is-success#unpause-animation-button(type='button' value='Start')
+        |
+        input.nes-btn.is-warning#c_restart(type='button' value='Restart')
+      form(name='anim-pixel-color-radio')
+        label
+          input.nes-radio.is-dark(type='radio', name='anim-pixel-color', value='blue,red', checked=true)
+          span Color1
+        label
+          input.nes-radio.is-dark(type='radio', name='anim-pixel-color', value='yellow,green')
+          span Color2
+        label
+          input.nes-radio.is-dark(type='radio', name='anim-pixel-color', value='white,purple')
+          span Color3
+        label
+          input.nes-radio.is-dark(type='radio', name='anim-pixel-color', value='gray,pink')
+          span Color4
+
+  .top-left-notification
+    .nes-container.is-dark.with-title
+      p.title Recent News:
+      p
+        | My work has been published in a scientific paper! [link]
+      p
+        | I'm also working on some simple multiplayer games! [link]
