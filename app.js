@@ -3,12 +3,16 @@ const express = require("express");
 const logger = require("morgan");
 const path = require("path");
 const session = require("express-session");
+const favicon = require("serve-favicon");
 
 const dashboardRouter = require("./routes/dashboard");
 const mainPageRouter = require("./routes/front-page");
 
 // App initialization
 const app = express();
+
+// icon
+app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
@@ -18,7 +22,6 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "assets")));
-
 
 //app.use(auth.oidc.router);
 //app.use(middleware.addUser);
