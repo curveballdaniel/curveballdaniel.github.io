@@ -1,4 +1,4 @@
-# CREDITS/TECHS:
+# Credits/Techs:
 
 Node, Pug, CSS, Heroku!
 
@@ -8,3 +8,7 @@ Node, Pug, CSS, Heroku!
 # Website Link:
 
 https://daniel-peter-website.herokuapp.com/
+
+# Games Link: 
+
+https://daniel-peter-website.herokuapp.com/games 
