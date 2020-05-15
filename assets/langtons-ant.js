@@ -68,14 +68,15 @@ function makeNewAnim() {
 		draw: function() {
 			for (var i in this.todraw){
 				var color = false;
+				var radioBox = document.querySelector('input[name="anim-pixel-color"]:checked');
 
 				if (this.todraw[i][2] == 0){// empty
 					color = "black";
 				} else 	if (this.todraw[i][2] == 1){	// block
 					// parse through radio input, obtain first, second values
-					color = document.querySelector('input[name="anim-pixel-color"]:checked').value.split(',')[0];
+					color = ((radioBox) ? radioBox.value.split(',')[0] : 'blue');
 				} else if (this.todraw[i][2] == 2){		// red
-					color = document.querySelector('input[name="anim-pixel-color"]:checked').value.split(',')[1];
+					color = ((radioBox) ? radioBox.value.split(',')[1] : 'red');
 				}
 
 				this.canvas.fillStyle = color;

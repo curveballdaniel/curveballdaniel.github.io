@@ -5,7 +5,7 @@ const path = require("path");
 const session = require("express-session");
 const favicon = require("serve-favicon");
 
-const dashboardRouter = require("./routes/dashboard");
+const gamesRouter = require("./routes/games");
 const mainPageRouter = require("./routes/front-page");
 
 // App initialization
@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, "assets")));
 
 // Routes
 app.use("/", mainPageRouter);
-app.use("/dashboard", dashboardRouter);
+app.use("/games", gamesRouter);
 //app.use("/users", usersRouter);
 
 // Error handlers

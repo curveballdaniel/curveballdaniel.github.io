@@ -3,9 +3,9 @@ const express = require("express");
 
 const router = express.Router();
 
-// Display the dashboard page
+// Display the games page
 router.get("/", (req, res) => {
-  res.render("dashboard");
+  res.render("games");
 });
 
 

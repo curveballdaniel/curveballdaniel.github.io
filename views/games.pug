@@ -1,0 +1,21 @@
+extends layout
+
+block variables
+  - var title = "Games"
+
+block content
+  script(src="pixel-letters.js", type="text/javascript")
+  script(src="langtons-ant.js", type="text/javascript")
+  canvas(class="obscure-background" id="langtons-ant" width="900" height="940")
+
+  .center-notification-top
+    .nes-container.is-dark.with-title
+      p.title Welcome to the games page!
+      p
+        |  Here, you'll find a bunch of simple multiplayer games I'm working on, mostly in node.js
+
+  .center-notification-bottom
+    .nes-container.is-dark.with-title
+      p.title My first work in progress!
+      p
+        | Welcome to: #[a(href='http://google.com') ABCDEFG], a new blah blah blah. #[a(href='/') link]
