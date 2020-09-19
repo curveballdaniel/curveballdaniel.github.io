@@ -252,7 +252,7 @@ function makeNewAnim() {
 			ocoordinates(spellingAnts, x, y, offset);
 
 			// reset coordinates for next line
-			x=xposition;
+			x=xposition-2;
 			y=y+15;
 			offset = 0
 			// D
